@@ -12,6 +12,11 @@
     "lint": "eslint src/*.js",
     "coverage:report": "nyc --check-coverage --lines 80 --statements 80 --branch 80 --per-file --reporter=html mocha tests"
   },
+  "husky": {
+    "hooks": {
+      "pre-push": "npm run test"
+    }
+  },
   "keywords": [
     "Xendit"
   ],
@@ -27,6 +32,7 @@
     "eslint": "6.8.0",
     "eslint-cli": "^1.1.1",
     "eslint-plugin-import": "^2.22.1",
+    "husky": "^4.3.8",
     "mocha": "^6.1.4",
     "nyc": "^15.1.0",
     "supertest": "^4.0.2"
