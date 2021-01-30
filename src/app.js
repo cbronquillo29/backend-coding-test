@@ -7,7 +7,7 @@ const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
 
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocs =  require('../swagger.json');
+const swaggerDocs = require('../swagger.json');
 
 module.exports = (db) => {
     app.get('/health', (req, res) => res.send('Healthy'));
@@ -118,7 +118,7 @@ module.exports = (db) => {
             res.send(rows);
         });
     });
-    
+
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
     return app;
