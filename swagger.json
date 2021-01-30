@@ -1,0 +1,192 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "Backend Coding Test",
+        "description": "Technical Assessment Test by Xendit"
+    },
+    "host": "localhost:8010",
+    "basePath": "/",
+    "tags": [
+        {
+            "name": "Health",
+            "description": "Access to API Health Check"
+        },
+        {
+            "name": "Rides",
+            "description": "Access to Ride Details"
+        }
+    ],
+    "schemes": [
+        "http"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "paths": {
+        "/health": {
+            "get": {
+                "summary": "Check API health",
+                "tags": [
+                    "Health"
+                ],
+                "description": "Check if server is up and running",
+                "responses": {
+                    "200": {
+                        "description": "Healthy"
+                    }
+                }
+            }
+        },
+        "/rides": {
+            "get": {
+                "summary": "Retrieve ride details",
+                "tags": [
+                    "Rides"
+                ],
+                "description": "Retrieve ride details of all stored rides",
+                "responses": {
+                    "200": {
+                        "description": "Successful retrieval of ride details",
+                        "schema": {
+                            "$ref": "#/definitions/Rides"
+                        }
+                    },
+                    "404": {
+                        "description": "No ride details found"
+                    },
+                    "500": {
+                        "description": "Unknown server error"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Upload ride details",
+                "tags": [
+                    "Rides"
+                ],
+                "parameters": [
+                    {
+                        "name": "ride",
+                        "in": "body",
+                        "description": "Upload ride details",
+                        "schema": {
+                            "$ref": "#/definitions/RideRequest"
+                        }
+                    }
+                ],
+                "description": "Create and add new ride entry",
+                "responses": {
+                    "200": {
+                        "description": "On successful adding, returns details of newly added ride",
+                        "schema": {
+                            "$ref": "#/definitions/Ride"
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Unknown server error"
+                    }
+                }
+            }
+        },
+        "/rides/{id}": {
+            "get": {
+                "summary": "Find Ride by ID ",
+                "tags": [
+                    "Rides"
+                ],
+                "description": "Returns a single Ride detail",
+                "parameters": [
+                    {
+                        "name": "rideId",
+                        "in": "path",
+                        "description": "ID of ride detail to return",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful retrieval or ride detail",
+                        "schema": {
+                            "$ref": "#/definitions/Ride"
+                        }
+                    },
+                    "404": {
+                        "description": "Ride id not found"
+                    },
+                    "500": {
+                        "description": "Unknown server error"
+                    }
+                }   
+            }
+        }
+    },
+    "definitions": {
+        "Ride": {
+            "properties": {
+                "rideId": {
+                    "type": "number"
+                },
+                "startLat": {
+                    "type": "number"
+                },
+                "startLong": {
+                    "type": "number"
+                },
+                "endLat": {
+                    "type": "number"
+                },
+                "endLong": {
+                    "type": "number"
+                },
+                "riderName": {
+                    "type": "string"
+                },
+                "driverName": {
+                    "type": "string"
+                },
+                "driverVehicle": {
+                    "type": "string"
+                }
+            }
+        },
+        "Rides": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Ride"
+            }
+        },
+        "RideRequest": {
+            "properties": {
+                "startLat": {
+                    "type": "number"
+                },
+                "startLong": {
+                    "type": "number"
+                },
+                "endLat": {
+                    "type": "number"
+                },
+                "endLong": {
+                    "type": "number"
+                },
+                "riderName": {
+                    "type": "string"
+                },
+                "driverName": {
+                    "type": "string"
+                },
+                "driverVehicle": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
