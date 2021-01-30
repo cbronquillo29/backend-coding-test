@@ -8,7 +8,9 @@
   },
   "scripts": {
     "test": "mocha tests",
-    "start": "node index.js"
+    "start": "node index.js",
+    "lint": "eslint src/*.js"
+    
   },
   "keywords": [
     "Xendit"
@@ -22,6 +24,9 @@
     "swagger-ui-express": "^4.1.6"
   },
   "devDependencies": {
+    "eslint": "6.8.0",
+    "eslint-cli": "^1.1.1",
+    "eslint-plugin-import": "^2.22.1",
     "mocha": "^6.1.4",
     "supertest": "^4.0.2"
   }
