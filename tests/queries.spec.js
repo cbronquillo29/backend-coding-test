@@ -2,7 +2,7 @@
 
 const assert = require('assert');
 const { getRides, getRidesById, getRidesByPage } = require('../src/utils/queries');
-const { SERVER_ERROR } = require('../src/utils/constants');
+const { SERVER_ERROR, VALIDATION_ERROR } = require('../src/utils/constants');
 
 const sqlite3 = require('sqlite3').verbose();
 const mockDb = new sqlite3.Database(':memory:');
@@ -27,6 +27,16 @@ describe('Async Test', () => {
         assert.strictEqual(error.error_code, SERVER_ERROR);
       }
     });
+    it('should catch VALIDATION_ERROR error_code on "getRidesById"', async () => {
+      try {
+        // set ride ID as non numeric character
+        const mockRideId = 'a';
+        const results = await getRidesById(mockDb, mockRideId);
+        console.log(results);
+      } catch (error) {
+        assert.strictEqual(error.error_code, VALIDATION_ERROR);
+      }
+    });
     it('should catch SERVER_ERROR error_code on "getRidesByPage"', async () => {
       try {
         const mockParam = {
@@ -39,5 +49,7 @@ describe('Async Test', () => {
         assert.strictEqual(error.error_code, SERVER_ERROR);
       }
     });
+
+
   });
 });
