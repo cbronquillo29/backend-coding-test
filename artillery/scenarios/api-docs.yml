@@ -1,0 +1,12 @@
+config:
+  target: "http://localhost:8010"
+  phases:
+    - duration: 30
+      arrivalRate: 100
+  ensure:
+    p99: 50
+scenarios:
+  - name: View API Docs rendered by Swagger
+    flow:
+      - get:
+          url: "/api-docs/"

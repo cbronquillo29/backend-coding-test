@@ -1,0 +1,14 @@
+config:
+  target: "http://localhost:8010"
+  phases:
+    - duration: 30
+      arrivalRate: 100
+  ensure:
+    p99: 50
+  variables:
+    id: 1
+scenarios:
+  - name: Retrieve a Ride Detail by ID
+    flow:
+      - get:
+          url: "/rides/{{ id }}"
