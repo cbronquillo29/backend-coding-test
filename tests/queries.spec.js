@@ -12,8 +12,7 @@ describe('Async Test', () => {
   describe('Reject tests', () => {
     it('should catch SERVER_ERROR error_code on "getRides"', async () => {
       try {
-        const results = await getRides(mockDb);
-        console.log(results);
+        await getRides(mockDb);
       } catch (error) {
         assert.strictEqual(error.error_code, SERVER_ERROR);
       }
@@ -21,8 +20,7 @@ describe('Async Test', () => {
     it('should catch SERVER_ERROR error_code on "getRidesById"', async () => {
       try {
         const mockRideId = 1;
-        const results = await getRidesById(mockDb, mockRideId);
-        console.log(results);
+        await getRidesById(mockDb, mockRideId);
       } catch (error) {
         assert.strictEqual(error.error_code, SERVER_ERROR);
       }
@@ -31,8 +29,7 @@ describe('Async Test', () => {
       try {
         // set ride ID as non numeric character
         const mockRideId = 'a';
-        const results = await getRidesById(mockDb, mockRideId);
-        console.log(results);
+        await getRidesById(mockDb, mockRideId);
       } catch (error) {
         assert.strictEqual(error.error_code, VALIDATION_ERROR);
       }
@@ -43,8 +40,7 @@ describe('Async Test', () => {
           count: 1,
           offset: 1
         };
-        const results = await getRidesByPage(mockDb, mockParam);
-        console.log(results);
+        await getRidesByPage(mockDb, mockParam);
       } catch (error) {
         assert.strictEqual(error.error_code, SERVER_ERROR);
       }
