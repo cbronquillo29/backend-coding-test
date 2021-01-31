@@ -14,7 +14,7 @@ const postRides = (db, params) => {
       resolve({
         error_code: SUCCESS,
         message: 'Success',
-        last_id: this.lastID !== undefined ? this.lastID: -1
+        last_id: this && this.lastID ? this.lastID: -1
       });
     });
   });
@@ -64,8 +64,8 @@ const getRides = (db) => {
 
 const getRidesByPage = (db, { count, offset }) => {
   return new Promise((resolve, reject) => {
-    db.all('SELECT * FROM Rides ORDER BY rideID ASC LIMIT ? OFFSET ?', [count, offset], function (err, rows) {
-      if (err) {
+    db.all('SELECT * FROM Rides WHERE rideID > ? AND rideID <= ?', [offset, Number(offset) + Number(count)], function (err, rows) {
+      if (err) { 
         reject({
           error_code: SERVER_ERROR,
           message: err
