@@ -3,6 +3,7 @@
 const assert = require('assert');
 const request = require('supertest');
 
+const {NOT_FOUND_ERROR, VALIDATION_ERROR} = require('../src/utils/constants');
 
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database(':memory:');
@@ -52,7 +53,7 @@ describe('API tests', () => {
   describe('GET /ride/:page/:count before ride details insertion', () => {
     it('should return "RIDES_NOT_FOUND_ERROR" when there are no existing rides', (done) => {
       const expectedRespBody = {
-        error_code: 'RIDES_NOT_FOUND_ERROR',
+        error_code: NOT_FOUND_ERROR,
         message: 'Could not find any rides'
       };
 
@@ -88,7 +89,7 @@ describe('API tests', () => {
       };
 
       const expectedRespBody = {
-        error_code: 'VALIDATION_ERROR',
+        error_code: VALIDATION_ERROR,
         message: 'Start latitude and longitude must be between -90 - 90 and -180 to 180 degrees respectively'
       };
 
@@ -111,7 +112,7 @@ describe('API tests', () => {
       };
 
       const expectedRespBody = {
-        error_code: 'VALIDATION_ERROR',
+        error_code: VALIDATION_ERROR,
         message: 'End latitude and longitude must be between -90 - 90 and -180 to 180 degrees respectively'
       };
 
@@ -133,7 +134,7 @@ describe('API tests', () => {
       };
 
       const expectedRespBody = {
-        error_code: 'VALIDATION_ERROR',
+        error_code: VALIDATION_ERROR,
         message: 'Rider name must be a non empty string'
       };
 
@@ -155,7 +156,7 @@ describe('API tests', () => {
       };
 
       const expectedRespBody = {
-        error_code: 'VALIDATION_ERROR',
+        error_code: VALIDATION_ERROR,
         message: 'Driver name must be a non empty string'
       };
 
@@ -177,7 +178,7 @@ describe('API tests', () => {
       };
 
       const expectedRespBody = {
-        error_code: 'VALIDATION_ERROR',
+        error_code: VALIDATION_ERROR,
         message: 'Driver vehicle must be a non empty string'
       };
 
@@ -224,7 +225,7 @@ describe('API tests', () => {
       const count = '5;';  
 
       const expectedRespBody = {
-        error_code: 'VALIDATION_ERROR',
+        error_code: VALIDATION_ERROR,
         message: 'page number and number of items per page must be of type Number'
       };
 
@@ -242,7 +243,7 @@ describe('API tests', () => {
       const pageNumber = 100;
       const count = 2;  
       const expectedRespBody = {
-        error_code: 'VALIDATION_ERROR',
+        error_code: VALIDATION_ERROR,
         message: 'Page number provided exceeds total number of ride details'
       };
       request(app)
@@ -273,7 +274,7 @@ describe('API tests', () => {
 
     it('should return "RIDES_NOT_FOUND_ERROR" when rideID does not exist', (done) => {
       const expectedRespBody = {
-        error_code: 'RIDES_NOT_FOUND_ERROR',
+        error_code: NOT_FOUND_ERROR,
         message: 'Could not find any rides'
       };
 
