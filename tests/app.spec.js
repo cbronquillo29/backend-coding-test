@@ -218,6 +218,26 @@ describe('API tests', () => {
           done();
         });
     });
+    it('should return "VALIDATION_ERROR" on invalid page number and count types', (done) => {
+      //set page number and count to string with non numeric characters
+      const pageNumber = '1; Select * from Users;';
+      const count = '5;';  
+
+      const expectedRespBody = {
+        error_code: 'VALIDATION_ERROR',
+        message: 'page number and number of items per page must be of type Number'
+      };
+
+      request(app)
+        .get(`/rides/${pageNumber}/${count}`)
+        .expect('Content-Type', /json/)
+        .expect(422)
+        .then((data) => {
+          compareErrRespBody(expectedRespBody, data.body);   
+          done();
+        });
+    });
+
     it('should return "VALIDATION_ERROR" on exceeded page number', (done) => {
       const pageNumber = 100;
       const count = 2;  
