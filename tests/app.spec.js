@@ -48,28 +48,6 @@ describe('API tests', () => {
     });
   });
 
-
-
-  describe('GET /ride/:page/:count before ride details insertion', () => {
-    it('should return "RIDES_NOT_FOUND_ERROR" when there are no existing rides', (done) => {
-      const expectedRespBody = {
-        error_code: NOT_FOUND_ERROR,
-        message: 'Could not find any rides'
-      };
-
-      const pageNumber = 5;
-      const count = 5;
-      request(app)
-        .get(`/rides/${pageNumber}/${count}`)
-        .expect('Content-Type', /json/)
-        .expect(404)
-        .then((data) => {
-          compareErrRespBody(expectedRespBody, data.body);
-          done();
-        }).catch(done);
-    });
-  });
-
   const mockValidRideDetails = {
     start_lat: 50,
     start_long: 50,
@@ -260,7 +238,6 @@ describe('API tests', () => {
   describe('GET /rides/:id', () => {
 
     const validRideId = '1';
-    const invalidRideId = '9';
     it('should return a ride detail when id exists', (done) => {
       request(app)
         .get(`/rides/${validRideId}`)
@@ -273,6 +250,7 @@ describe('API tests', () => {
     });
 
     it('should return "RIDES_NOT_FOUND_ERROR" when rideID does not exist', (done) => {
+      let invalidRideId = '9';
       const expectedRespBody = {
         error_code: NOT_FOUND_ERROR,
         message: 'Could not find any rides'
@@ -282,6 +260,23 @@ describe('API tests', () => {
         .get(`/rides/${invalidRideId}`)
         .expect('Content-Type', /json/)
         .expect(404)
+        .then((data) => {
+          compareErrRespBody(expectedRespBody, data.body);
+          done();
+        }).catch(done);
+    });
+
+    it('should return "VALIDATION_ERROR" when rideID is not of type Number', (done) => {
+      const invalidRideId = '1; Select * from Users;';
+      const expectedRespBody = {
+        error_code: VALIDATION_ERROR,
+        message: 'Id must be of type Number'
+      };
+
+      request(app)
+        .get(`/rides/${invalidRideId}`)
+        .expect('Content-Type', /json/)
+        .expect(422)
         .then((data) => {
           compareErrRespBody(expectedRespBody, data.body);
           done();

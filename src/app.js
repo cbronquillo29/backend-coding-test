@@ -13,7 +13,7 @@ const logger = require('./logger');
 const util = require('./utils/helper');
 const { VALIDATION_ERROR, SERVER_ERROR, NOT_FOUND_ERROR, SUCCESS } = require('./utils/constants');
 
-const { postRides, getRidesById, getRides, getRidesByPage } = require('./utils/queries');
+const { postRides, getRidesById, getRidesByPage } = require('./utils/queries');
 
 module.exports = (db) => {
   app.get('/health', (req, res) => res.send('Healthy'));
@@ -77,18 +77,6 @@ module.exports = (db) => {
           error_code: VALIDATION_ERROR,
           message: 'page number and number of items per page must be of type Number'
         };
-      }
-
-      // check first if there are any ride details stored
-      let { data } = await getRides(db);
-
-      if (data.length === 0) {
-        const message = 'Could not find any rides';
-        logger.error(message);
-        return res.status(404).send({
-          error_code: NOT_FOUND_ERROR,
-          message: message
-        });
       }
 
       // proceed with server side pagination given count and page
