@@ -24,13 +24,13 @@ describe('API tests', () => {
   });
 
   const compareRideDetails = (expected, actual) => {
-    assert(expected.start_lat, actual.startLat);
-    assert(expected.start_long, actual.startLong);
-    assert(expected.end_lat, actual.endLat);
-    assert(expected.end_long, actual.endLong);
-    assert(expected.rider_name, actual.riderName);
-    assert(expected.driver_name, actual.driverName);
-    assert(expected.driver_vehicle, actual.driverVehicle);
+    assert.strictEqual(expected.start_lat, actual.startLat);
+    assert.strictEqual(expected.start_long, actual.startLong);
+    assert.strictEqual(expected.end_lat, actual.endLat);
+    assert.strictEqual(expected.end_long, actual.endLong);
+    assert.strictEqual(expected.rider_name, actual.riderName);
+    assert.strictEqual(expected.driver_name, actual.driverName);
+    assert.strictEqual(expected.driver_vehicle, actual.driverVehicle);
   };
 
   const compareErrRespBody = (expected, actual) => {
@@ -47,17 +47,19 @@ describe('API tests', () => {
     });
   });
 
-  
 
-  describe('GET /rides before ride details insertion', () => {
+
+  describe('GET /ride/:page/:count before ride details insertion', () => {
     it('should return "RIDES_NOT_FOUND_ERROR" when there are no existing rides', (done) => {
-      const expectedRespBody = { 
+      const expectedRespBody = {
         error_code: 'RIDES_NOT_FOUND_ERROR',
         message: 'Could not find any rides'
       };
 
+      const pageNumber = 5;
+      const count = 5;
       request(app)
-        .get('/rides')
+        .get(`/rides/${pageNumber}/${count}`)
         .expect('Content-Type', /json/)
         .then((data) => {
           compareErrRespBody(expectedRespBody, data.body);
@@ -79,12 +81,12 @@ describe('API tests', () => {
   describe('POST /rides', () => {
     it('should return "VALIDATION_ERROR" on startLat and startLong out of bounds', (done) => {
       const invalidRideDetails = {
-        ...mockValidRideDetails, 
+        ...mockValidRideDetails,
         start_lat: -100,
         start_long: 200
       };
 
-      const expectedRespBody = { 
+      const expectedRespBody = {
         error_code: 'VALIDATION_ERROR',
         message: 'Start latitude and longitude must be between -90 - 90 and -180 to 180 degrees respectively'
       };
@@ -93,7 +95,6 @@ describe('API tests', () => {
         .post('/rides')
         .send(invalidRideDetails)
         .expect('Content-Type', /json/)
-        .expect(200)
         .then((data) => {
           compareErrRespBody(expectedRespBody, data.body);
           done();
@@ -102,12 +103,12 @@ describe('API tests', () => {
 
     it('should return "VALIDATION_ERROR" on endLat and endLong out of bounds', (done) => {
       const invalidRideDetails = {
-        ...mockValidRideDetails, 
+        ...mockValidRideDetails,
         end_lat: -100,
         end_long: 200
       };
 
-      const expectedRespBody = { 
+      const expectedRespBody = {
         error_code: 'VALIDATION_ERROR',
         message: 'End latitude and longitude must be between -90 - 90 and -180 to 180 degrees respectively'
       };
@@ -116,7 +117,6 @@ describe('API tests', () => {
         .post('/rides')
         .send(invalidRideDetails)
         .expect('Content-Type', /json/)
-        .expect(200)
         .then((data) => {
           compareErrRespBody(expectedRespBody, data.body);
           done();
@@ -125,11 +125,11 @@ describe('API tests', () => {
 
     it('should return "VALIDATION_ERROR" on empty riderName', (done) => {
       const invalidRideDetails = {
-        ...mockValidRideDetails, 
-        rider_name:''
+        ...mockValidRideDetails,
+        rider_name: ''
       };
 
-      const expectedRespBody = { 
+      const expectedRespBody = {
         error_code: 'VALIDATION_ERROR',
         message: 'Rider name must be a non empty string'
       };
@@ -138,7 +138,6 @@ describe('API tests', () => {
         .post('/rides')
         .send(invalidRideDetails)
         .expect('Content-Type', /json/)
-        .expect(200)
         .then((data) => {
           compareErrRespBody(expectedRespBody, data.body);
           done();
@@ -147,11 +146,11 @@ describe('API tests', () => {
 
     it('should return "VALIDATION_ERROR" on empty driverName', (done) => {
       const invalidRideDetails = {
-        ...mockValidRideDetails, 
-        driver_name:''
+        ...mockValidRideDetails,
+        driver_name: ''
       };
 
-      const expectedRespBody = { 
+      const expectedRespBody = {
         error_code: 'VALIDATION_ERROR',
         message: 'Driver name must be a non empty string'
       };
@@ -160,7 +159,6 @@ describe('API tests', () => {
         .post('/rides')
         .send(invalidRideDetails)
         .expect('Content-Type', /json/)
-        .expect(200)
         .then((data) => {
           compareErrRespBody(expectedRespBody, data.body);
           done();
@@ -169,11 +167,11 @@ describe('API tests', () => {
 
     it('should return "VALIDATION_ERROR" on empty driverVehicle', (done) => {
       const invalidRideDetails = {
-        ...mockValidRideDetails, 
-        driver_vehicle:''
+        ...mockValidRideDetails,
+        driver_vehicle: ''
       };
 
-      const expectedRespBody = { 
+      const expectedRespBody = {
         error_code: 'VALIDATION_ERROR',
         message: 'Driver vehicle must be a non empty string'
       };
@@ -182,7 +180,6 @@ describe('API tests', () => {
         .post('/rides')
         .send(invalidRideDetails)
         .expect('Content-Type', /json/)
-        .expect(200)
         .then((data) => {
           compareErrRespBody(expectedRespBody, data.body);
           done();
@@ -196,22 +193,45 @@ describe('API tests', () => {
         .expect('Content-Type', /json/)
         .expect(200)
         .then((data) => {
-          compareRideDetails(mockValidRideDetails, data.body);
+          compareRideDetails(mockValidRideDetails, data.body[0]);
           done();
         });
     });
   });
 
-  describe('GET /rides after ride details insertion', () => {
+  describe('GET /rides/:page/:count after ride details insertion', () => {
     it('should return a list of ride details', (done) => {
+      const pageNumber = 1;
+      const count = 5;  
       request(app)
-        .get('/rides')
+        .get(`/rides/${pageNumber}/${count}`)
         .expect('Content-Type', /json/)
-        .expect(200, done);
+        .expect(200)
+        .then((data) => {
+          compareRideDetails(mockValidRideDetails, data.body[0]);  
+          done();
+        });
+    });
+    it('should return "VALIDATION_ERROR" on exceeded page number', (done) => {
+      const pageNumber = 100;
+      const count = 2;  
+      const expectedRespBody = {
+        error_code: 'VALIDATION_ERROR',
+        message: 'Page number provided exceeds total number of ride details'
+      };
+      request(app)
+        .get(`/rides/${pageNumber}/${count}`)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then((data) => {
+          compareErrRespBody(expectedRespBody, data.body);  
+          done();
+        });
     });
   });
 
   describe('GET /rides/:id', () => {
+
     const validRideId = '1';
     const invalidRideId = '9';
     it('should return a ride detail when id exists', (done) => {
@@ -220,13 +240,13 @@ describe('API tests', () => {
         .expect('Content-Type', /json/)
         .expect(200)
         .then((data) => {
-          compareRideDetails(mockValidRideDetails, data.body);
+          compareRideDetails(mockValidRideDetails, data.body[0]);
           done();
         }).catch(done);
     });
 
     it('should return "RIDES_NOT_FOUND_ERROR" when rideID does not exist', (done) => {
-      const expectedRespBody = { 
+      const expectedRespBody = {
         error_code: 'RIDES_NOT_FOUND_ERROR',
         message: 'Could not find any rides'
       };
@@ -241,5 +261,5 @@ describe('API tests', () => {
     });
   });
 
-  
+
 });

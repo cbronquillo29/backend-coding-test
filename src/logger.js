@@ -6,12 +6,13 @@ const logFormat = format.printf( ({ level, message, timestamp }) => {
 
 const logger = createLogger({
   transports:[
-    new transports.Console({
-      format: format.combine(
-        format.timestamp(), 
-        logFormat
-      )
-    }),
+    /* uncomment below if you want to enable winston logs in terminal */
+    // new transports.Console({
+    //   format: format.combine(
+    //     format.timestamp(), 
+    //     logFormat
+    //   )
+    // }),
     new transports.File({
       filename: './logs/debug.log',
       format: format.combine(
