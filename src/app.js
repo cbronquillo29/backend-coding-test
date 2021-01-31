@@ -10,117 +10,75 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerDocs = require('../swagger.json');
 
 const logger = require('./logger');
+const util = require('./utils/helper');
+const { VALIDATION_ERROR, SERVER_ERROR, NOT_FOUND_ERROR, SUCCESS } = require('./utils/constants');
+
+const { postRides, getRidesById, getRides, getRidesByPage } = require('./utils/queries');
 
 module.exports = (db) => {
   app.get('/health', (req, res) => res.send('Healthy'));
 
-  const VALIDATION_ERROR = 'VALIDATION_ERROR';
-  const SERVER_ERROR = 'SERVER_ERROR';
-  const NOT_FOUND_ERROR = 'RIDES_NOT_FOUND_ERROR';
+  app.post('/rides', jsonParser, async (req, res) => {
+    try {
+      const rideDetails = {
+        startLatitude: Number(req.body.start_lat),
+        startLongitude: Number(req.body.start_long),
+        endLatitude: Number(req.body.end_lat),
+        endLongitude: Number(req.body.end_long),
+        riderName: req.body.rider_name,
+        driverName: req.body.driver_name,
+        driverVehicle: req.body.driver_vehicle,
+      };
 
-  app.post('/rides', jsonParser, (req, res) => {
-    const startLatitude = Number(req.body.start_lat);
-    const startLongitude = Number(req.body.start_long);
-    const endLatitude = Number(req.body.end_lat);
-    const endLongitude = Number(req.body.end_long);
-    const riderName = req.body.rider_name;
-    const driverName = req.body.driver_name;
-    const driverVehicle = req.body.driver_vehicle;
-
-    if (startLatitude < -90 || startLatitude > 90 || startLongitude < -180 || startLongitude > 180) {
-      const message = 'Start latitude and longitude must be between -90 - 90 and -180 to 180 degrees respectively';
-      logger.error(message);
-      return res.send({
-        error_code: VALIDATION_ERROR,
-        message: message
-      });
-    }
-
-    if (endLatitude < -90 || endLatitude > 90 || endLongitude < -180 || endLongitude > 180) {
-      const message = 'End latitude and longitude must be between -90 - 90 and -180 to 180 degrees respectively';
-      logger.error(message);
-      return res.send({
-        error_code: VALIDATION_ERROR,
-        message: message
-      });
-    }
-
-    if (typeof riderName !== 'string' || riderName.length < 1) {
-      const message = 'Rider name must be a non empty string';
-      logger.error(message);
-      return res.send({
-        error_code: VALIDATION_ERROR,
-        message: message
-      });
-    }
-
-    if (typeof driverName !== 'string' || driverName.length < 1) {
-      const message = 'Driver name must be a non empty string';
-      logger.error(message);
-      return res.send({
-        error_code: VALIDATION_ERROR,
-        message: message
-      });
-    }
-
-    if (typeof driverVehicle !== 'string' || driverVehicle.length < 1) {
-      const message = 'Driver vehicle must be a non empty string';
-      logger.error(message);
-      return res.send({
-        error_code: VALIDATION_ERROR,
-        message: message
-      });
-    }
-
-    var values = [req.body.start_lat, req.body.start_long, req.body.end_lat, req.body.end_long, req.body.rider_name, req.body.driver_name, req.body.driver_vehicle];
-
-    db.run('INSERT INTO Rides(startLat, startLong, endLat, endLong, riderName, driverName, driverVehicle) VALUES (?, ?, ?, ?, ?, ?, ?)', values, function (err) {
-      if (err) {
-        const message = 'Unknown error';
-        logger.error(message);
-        return res.send({
-          error_code: SERVER_ERROR,
-          message: message
+      const validation = util.validate(rideDetails);
+      if (validation.code !== SUCCESS) {
+        logger.error(validation.message);
+        return res.status(422).send({
+          error_code: validation.code,
+          message: validation.message
         });
       }
 
-      db.all('SELECT * FROM Rides WHERE rideID = ?', this.lastID, function (err, rows) {
-        if (err) {
-          const message = 'Unknown error';
-          logger.error(message);
-          return res.send({
-            error_code: SERVER_ERROR,
-            message: message
-          });
-        }
+      const values = [
+        req.body.start_lat,
+        req.body.start_long,
+        req.body.end_lat,
+        req.body.end_long,
+        req.body.rider_name,
+        req.body.driver_name,
+        req.body.driver_vehicle
+      ];
 
-        logger.info('Successfully added ride details');
-        res.send(rows);
+      const results =
+        await postRides(db, values)
+          .then((data) => {
+            return getRidesById(db, data.last_id);
+          });
+
+      res.status(200).send(results);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send({
+        error_code: SERVER_ERROR,
+        message: error
       });
-    });
+    }
   });
 
-  app.get('/rides/:page/:count', (req, res) => {
-    // count: number of items per page
-    // page: page number
-    const count = req.params.count;
-    const page = req.params.page;
+  app.get('/rides/:page/:count', async (req, res) => {
+    try {
+      // count: number of items per page
+      // page: page number
+      const count = req.params.count;
+      const page = req.params.page;
 
-    // check first if there are any ride details stored
-    db.all('SELECT * FROM Rides ', function (err, rows) {
-      if (err) {
-        const message = 'Unknown error';
-        logger.error(message);
-        return res.send({
-          error_code: SERVER_ERROR,
-          message: message
-        });
-      }
+      // check first if there are any ride details stored
+      let { data } = await getRides(db);
 
-      if (rows.length === 0) {
+      if (data.length === 0) {
         const message = 'Could not find any rides';
         logger.error(message);
-        return res.send({
+        return res.status(404).send({
           error_code: NOT_FOUND_ERROR,
           message: message
         });
@@ -129,54 +87,55 @@ module.exports = (db) => {
       // proceed with server side pagination given count and page
       // calculate offset for sql query
       const offset = (page - 1) * count;
-      db.all(`SELECT * FROM Rides ORDER BY rideID ASC LIMIT ${count} OFFSET ${offset}`, function (err, rows) {
-        if (err) {
-          const message = 'Unknown error';
-          logger.error(message);
-          return res.send({
-            error_code: SERVER_ERROR,
-            message: message
-          });
-        }
 
-        if (rows.length === 0) {
-          const message = 'Page number provided exceeds total number of ride details';
-          logger.error(message);
-          return res.send({
-            error_code: VALIDATION_ERROR,
-            message: message
-          });
-        }
+      const param = {
+        offset: offset,
+        count: count
+      };
 
-        logger.info(`Successfully retrieved ${count} ride details for page ${page}`);
-        res.send(rows);
-      });
-    });
-  });
+      const results = await getRidesByPage(db, param);
 
-  app.get('/rides/:id', (req, res) => {
-    db.all(`SELECT * FROM Rides WHERE rideID='${req.params.id}'`, function (err, rows) {
-      if (err) {
-        const message = 'Unknown error';
+      if (results.data.length === 0) {
+        const message = 'Page number provided exceeds total number of ride details';
         logger.error(message);
-        return res.send({
-          error_code: SERVER_ERROR,
+        return res.status(422).send({
+          error_code: VALIDATION_ERROR,
           message: message
         });
       }
 
-      if (rows.length === 0) {
+      logger.info(`Successfully retrieved ${results.data.length} ride detail/s for page ${page}`);
+      res.status(200).send(results);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send({
+        error_code: SERVER_ERROR,
+        message: error
+      });
+    }
+  });
+
+  app.get('/rides/:id', async (req, res) => {
+    try {
+      const results = await getRidesById(db, req.params.id);
+
+      if (results.data.length === 0) {
         const message = 'Could not find any rides';
         logger.error(message);
-        return res.send({
+        return res.status(404).send({
           error_code: NOT_FOUND_ERROR,
           message: message
         });
       }
-
-      logger.info(`Successfully retrieved ride details with ID:${req.params.id}`);
-      res.send(rows);
-    });
+      logger.info(`Successfully retrieved ride details with rideID:${req.params.id}`);
+      res.status(200).send(results);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send({
+        error_code: SERVER_ERROR,
+        message: error
+      });
+    }
   });
 
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
