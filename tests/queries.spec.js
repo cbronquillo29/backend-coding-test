@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const { getRides, getRidesById, getRidesByPage } = require('../src/utils/queries');
+const { getRides, getRidesById, getRidesByPage, postRides } = require('../src/utils/queries');
 const { SERVER_ERROR, VALIDATION_ERROR } = require('../src/utils/constants');
 
 const sqlite3 = require('sqlite3').verbose();
@@ -34,13 +34,22 @@ describe('Async Test', () => {
         assert.strictEqual(error.error_code, VALIDATION_ERROR);
       }
     });
-    it('should catch SERVER_ERROR error_code on "getRidesByPage"', async () => {
+    it('should catch SERVER_ERROR error_code on "postRides"', async () => {
       try {
         const mockParam = {
           count: 1,
           offset: 1
         };
         await getRidesByPage(mockDb, mockParam);
+      } catch (error) {
+        assert.strictEqual(error.error_code, SERVER_ERROR);
+      }
+    });
+    it('should catch SERVER_ERROR error_code on "getRidesByPage"', async () => {
+      try {
+        const mockParam = [];
+
+        await postRides(mockDb, mockParam);
       } catch (error) {
         assert.strictEqual(error.error_code, SERVER_ERROR);
       }

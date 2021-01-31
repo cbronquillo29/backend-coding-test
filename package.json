@@ -10,6 +10,7 @@
     "test": "concurrently \"npm run test:coverage\" \"npm run lint\"",
     "start": "node index.js",
     "lint": "eslint .",
+    "test:load": "artillery run ./artillery/scenarios/check-health.yml && artillery run ./artillery/scenarios/api-docs.yml && artillery run ./artillery/scenarios/add-rides.yml && artillery run ./artillery/scenarios/get-rides-id.yml && artillery run ./artillery/scenarios/get-rides-page.yml",
     "lint:fix": "eslint . --fix",
     "test:coverage": "nyc --check-coverage --lines 80 --statements 80 --branch 80 --per-file mocha tests",
     "coverage:report": "nyc --check-coverage --lines 80 --statements 80 --branch 80 --per-file --reporter=html mocha tests"

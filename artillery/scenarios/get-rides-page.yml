@@ -1,0 +1,15 @@
+config:
+  target: "http://localhost:8010"
+  phases:
+    - duration: 30
+      arrivalRate: 100
+  ensure:
+    p99: 50
+  variables:
+    page: 1
+    count: 1
+scenarios:
+  - name: Retrieve Ride details by Page and Count
+    flow:
+      - get:
+          url: "/rides/{{ page }}/{{ count }}"
