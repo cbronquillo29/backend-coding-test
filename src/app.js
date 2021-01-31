@@ -100,8 +100,14 @@ module.exports = (db) => {
     });
   });
 
-  app.get('/rides', (req, res) => {
-    db.all('SELECT * FROM Rides', function (err, rows) {
+  app.get('/rides/:page/:count', (req, res) => {
+    // count: number of items per page
+    // page: page number
+    const count = req.params.count;
+    const page = req.params.page;
+
+    // check first if there are any ride details stored
+    db.all('SELECT * FROM Rides ', function (err, rows) {
       if (err) {
         const message = 'Unknown error';
         logger.error(message);
@@ -115,13 +121,36 @@ module.exports = (db) => {
         const message = 'Could not find any rides';
         logger.error(message);
         return res.send({
-          error_code: 'RIDES_NOT_FOUND_ERROR',
+          error_code: NOT_FOUND_ERROR,
           message: message
         });
       }
 
-      logger.info('Successfully retrieved rides');
-      res.send(rows);
+      // proceed with server side pagination given count and page
+      // calculate offset for sql query
+      const offset = (page - 1) * count;
+      db.all(`SELECT * FROM Rides ORDER BY rideID ASC LIMIT ${count} OFFSET ${offset}`, function (err, rows) {
+        if (err) {
+          const message = 'Unknown error';
+          logger.error(message);
+          return res.send({
+            error_code: SERVER_ERROR,
+            message: message
+          });
+        }
+
+        if (rows.length === 0) {
+          const message = 'Page number provided exceeds total number of ride details';
+          logger.error(message);
+          return res.send({
+            error_code: VALIDATION_ERROR,
+            message: message
+          });
+        }
+
+        logger.info(`Successfully retrieved ${count} ride details for page ${page}`);
+        res.send(rows);
+      });
     });
   });
 
