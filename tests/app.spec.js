@@ -193,7 +193,7 @@ describe('API tests', () => {
         .expect('Content-Type', /json/)
         .expect(200)
         .then((data) => {
-          compareRideDetails(mockValidRideDetails, data.body[0]);
+          compareRideDetails(mockValidRideDetails, data.body.data[0]);
           done();
         });
     });
@@ -208,7 +208,7 @@ describe('API tests', () => {
         .expect('Content-Type', /json/)
         .expect(200)
         .then((data) => {
-          compareRideDetails(mockValidRideDetails, data.body[0]);  
+          compareRideDetails(mockValidRideDetails, data.body.data[0]);  
           done();
         });
     });
@@ -222,7 +222,7 @@ describe('API tests', () => {
       request(app)
         .get(`/rides/${pageNumber}/${count}`)
         .expect('Content-Type', /json/)
-        .expect(200)
+        .expect(422)
         .then((data) => {
           compareErrRespBody(expectedRespBody, data.body);  
           done();
@@ -240,7 +240,7 @@ describe('API tests', () => {
         .expect('Content-Type', /json/)
         .expect(200)
         .then((data) => {
-          compareRideDetails(mockValidRideDetails, data.body[0]);
+          compareRideDetails(mockValidRideDetails, data.body.data[0]);
           done();
         }).catch(done);
     });
