@@ -62,14 +62,20 @@
           "200": {
             "description": "On successful adding, returns details of newly added ride",
             "schema": {
-              "$ref": "#/definitions/Ride"
+              "$ref": "#/definitions/Rides200"
             }
           },
           "422": {
-            "description": "Validation error"
+            "description": "Validation error",
+            "schema": {
+              "$ref": "#/definitions/ErrorCodes"
+            }
           },
           "500": {
-            "description": "Unknown server error"
+            "description": "Unknown server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorCodes"
+            }
           }
         }
       }
@@ -101,17 +107,26 @@
           "200": {
             "description": "Successful retrieval of ride details",
             "schema": {
-              "$ref": "#/definitions/Rides"
+              "$ref": "#/definitions/Rides200"
             }
           },
           "404": {
-            "description": "Could not find any rides"
+            "description": "Could not find any rides",
+            "schema": {
+              "$ref": "#/definitions/ErrorCodes"
+            }
           },
           "422": {
-            "description": "Page number provided exceeds total number of ride details"
+            "description": "Page number provided exceeds total number of ride details",
+            "schema": {
+              "$ref": "#/definitions/ErrorCodes"
+            }
           },
           "500": {
-            "description": "Unknown server error"
+            "description": "Unknown server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorCodes"
+            }
           }
         }
       }
@@ -136,14 +151,20 @@
           "200": {
             "description": "Successful retrieval or ride detail",
             "schema": {
-              "$ref": "#/definitions/Ride"
+              "$ref": "#/definitions/Rides200"
             }
           },
           "404": {
-            "description": "Ride id not found"
+            "description": "Ride id not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorCodes"
+            }
           },
           "500": {
-            "description": "Unknown server error"
+            "description": "Unknown server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorCodes"
+            }
           }
         }
       }
@@ -208,6 +229,29 @@
           "type": "string"
         },
         "driver_vehicle": {
+          "type": "string"
+        }
+      }
+    },
+    "Rides200": {
+      "properties": {
+        "error_code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/Rides"
+        }
+      }
+    },
+    "ErrorCodes": {
+      "properties": {
+        "error_code": {
+          "type": "string"
+        },
+        "message": {
           "type": "string"
         }
       }
