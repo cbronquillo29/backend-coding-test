@@ -55,7 +55,7 @@ module.exports = (db) => {
     }
 
     if (typeof driverName !== 'string' || driverName.length < 1) {
-      const message = 'Rider name must be a non empty string';
+      const message = 'Driver name must be a non empty string';
       logger.error(message);
       return res.send({
         error_code: VALIDATION_ERROR,
@@ -64,7 +64,7 @@ module.exports = (db) => {
     }
 
     if (typeof driverVehicle !== 'string' || driverVehicle.length < 1) {
-      const message = 'Rider name must be a non empty string';
+      const message = 'Driver vehicle must be a non empty string';
       logger.error(message);
       return res.send({
         error_code: VALIDATION_ERROR,
