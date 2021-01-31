@@ -1,6 +1,6 @@
 'use strict';
 
-const { SERVER_ERROR, SERVER_ERROR_MESSAGE, SUCCESS } = require('./constants');
+const { SERVER_ERROR, SERVER_ERROR_MESSAGE, SUCCESS, VALIDATION_ERROR } = require('./constants');
 
 const postRides = (db, params) => {
   return new Promise((resolve, reject) => {
@@ -22,6 +22,12 @@ const postRides = (db, params) => {
 
 const getRidesById = (db, param) => {
   return new Promise((resolve, reject) => {
+    if (isNaN(Number(param))) {
+      reject({
+        error_code: VALIDATION_ERROR,
+        message: 'Id must be of type Number'
+      });
+    }
     db.all('SELECT * FROM Rides WHERE rideID = ?', param, function (err, rows) {
       if (err) {
         reject({
@@ -58,7 +64,7 @@ const getRides = (db) => {
 
 const getRidesByPage = (db, { count, offset }) => {
   return new Promise((resolve, reject) => {
-    db.all(`SELECT * FROM Rides ORDER BY rideID ASC LIMIT ${count} OFFSET ${offset}`, function (err, rows) {
+    db.all('SELECT * FROM Rides ORDER BY rideID ASC LIMIT ? OFFSET ?', [count, offset], function (err, rows) {
       if (err) {
         reject({
           error_code: SERVER_ERROR,
