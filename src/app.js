@@ -55,7 +55,7 @@ module.exports = (db) => {
             return getRidesById(db, data.last_id);
           });
 
-      res.status(200).send(results);
+      return res.status(200).send(results);
     } catch (error) {
       logger.error(error);
       return res.status(500).send({
@@ -71,6 +71,13 @@ module.exports = (db) => {
       // page: page number
       const count = req.params.count;
       const page = req.params.page;
+
+      if (isNaN(Number(count)) || isNaN(Number(page))) {
+        throw {
+          error_code: VALIDATION_ERROR,
+          message: 'page number and number of items per page must be of type Number'
+        };
+      }
 
       // check first if there are any ride details stored
       let { data } = await getRides(db);
@@ -105,9 +112,16 @@ module.exports = (db) => {
       }
 
       logger.info(`Successfully retrieved ${results.data.length} ride detail/s for page ${page}`);
-      res.status(200).send(results);
+      return res.status(200).send(results);
     } catch (error) {
       logger.error(error);
+      if (error.error_code === VALIDATION_ERROR) {
+        return res.status(422).send({
+          error_code: error.error_code,
+          message: error.message
+        });
+      }
+
       return res.status(500).send({
         error_code: SERVER_ERROR,
         message: error
@@ -128,9 +142,15 @@ module.exports = (db) => {
         });
       }
       logger.info(`Successfully retrieved ride details with rideID:${req.params.id}`);
-      res.status(200).send(results);
+      return res.status(200).send(results);
     } catch (error) {
       logger.error(error);
+      if (error.error_code === VALIDATION_ERROR) {
+        return res.status(422).send({
+          error_code: error.error_code,
+          message: error.message
+        });
+      }
       return res.status(500).send({
         error_code: SERVER_ERROR,
         message: error
